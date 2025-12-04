@@ -1,0 +1,86 @@
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+class Transactionscategories extends CI_Controller
+{
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->load->model('Transaction_category_model', 'transaction_category_model');
+        $this->load->helper(['url', 'form']);
+        $this->load->library(['form_validation', 'pagination', 'session']);
+    }
+
+    /** صفحه Vue */
+    public function index()
+    {
+        $this->load->view('categories/index');
+    }
+
+    /** API جستجو + صفحه‌بندی */
+    public function search()
+    {
+        $user_id = $this->session->userdata('user_id');
+
+        $filters = [
+            'title' => $this->input->get('title'),
+            'user_id' => $user_id
+        ];
+
+        $page_size = 10;
+        $page = intval($this->input->get('page')) ?: 1;
+        $offset = ($page - 1) * $page_size;
+
+        $categories = $this->transaction_category_model->get_filtered_paginated(
+            $filters,
+            $page_size,
+            $offset
+        );
+
+        $total_rows = $this->transaction_category_model->count_filtered($filters);
+
+        echo json_encode([
+            'cats' => $categories,
+            'total_rows' => $total_rows,
+            'page' => $page,
+            'page_size' => $page_size
+        ]);
+    }
+
+    /** API ایجاد */
+    public function api_create()
+    {
+        $title = $this->input->post('title');
+        if (!$title) {
+            echo json_encode(['status' => 'error', 'message' => 'عنوان الزامی است']);
+            return;
+        }
+
+        $this->transaction_category_model->insert([
+            'title' => $title,
+            'user_id' => $this->session->userdata('user_id')
+        ]);
+
+        echo json_encode(['status' => 'success']);
+    }
+
+    /** API ویرایش */
+    public function api_update($id)
+    {
+        $title = $this->input->post('title');
+
+        $this->transaction_category_model->update($id, [
+            'title' => $title
+        ]);
+
+        echo json_encode(['status' => 'success']);
+    }
+
+    /** API حذف */
+    public function api_delete($id)
+    {
+        $this->transaction_category_model->delete($id);
+        echo json_encode(['status' => 'success']);
+    }
+}
