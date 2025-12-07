@@ -15,7 +15,7 @@ class Transactionscategories extends CI_Controller
     /** صفحه Vue */
     public function index()
     {
-        $this->load->view('categories/index');
+        $this->load->view('dashboard/categories');
     }
 
     /** API جستجو + صفحه‌بندی */

@@ -1,105 +1,148 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Dashboard extends CI_Controller {
-	
-	private function getUserData()
+class Dashboard extends CI_Controller
 {
-    return (object)[
-        'id'       => $this->session->userdata('user_id'),
-        'username' => $this->session->userdata('username'),
-		'profile_image' => $this->session->userdata('profile_image'),
-    ];
-}
 
-    public function __construct()
-    {
-        parent::__construct();
-        $this->load->library('session');
-		$this->load->model('User_model');
-		$this->load->model('Transaction_model');
-		$this->load->model('Transaction_category_model');
+        public function __construct()
+        {
+                parent::__construct();
 
-        if (!$this->session->userdata('logged_in')) {
-            redirect('auth/signup');
+                $this->load->library('session');
+                $this->load->model('User_model');
+                $this->load->model('Transaction_model');
+                $this->load->model('Transaction_category_model');
+
+                if (!$this->session->userdata('logged_in')) {
+                        redirect('auth/signup');
+                }
         }
-    }
 
-//     public function home_ajax()
-// {
-// 		$this->load->view("dashboard");
-// }
+        private function load_view($active, $view, $data = [])
+        {
+                $data['active_menu'] = $active;
 
-	public function home_ajax()
-{
-		$user_id = $this->session->userdata('user_id');
+                // لود محتوای داخلی
+                $data['content'] = $this->load->view($view, $data, true);
 
-		$data['total_income']  = $this->Transaction_model->get_total_income($user_id);
-		$data['total_expense'] = $this->Transaction_model->get_total_expense($user_id);
-		$data['balance']       = $this->Transaction_model->get_balance($user_id);
+                // لود قالب اصلی
+                $this->load->view("dashboard/layout", $data);
+        }
 
-		$this->load->view("dashboard_home", $data);
-}
+        public function index()
+        {
+                $user_id = $this->session->userdata('user_id');
 
+                $data['total_income'] = $this->Transaction_model->get_total_income($user_id);
+                $data['total_expense'] = $this->Transaction_model->get_total_expense($user_id);
+                $data['balance'] = $this->Transaction_model->get_balance($user_id);
 
-	public function profile_ajax()
-	{
-		$user_id = $this->session->userdata('user_id');
-		$data['user'] = $this->User_model->get_user_by_id($user_id);
+                $this->load_view('home', 'dashboard/home', $data);
+        }
 
-		$this->load->view("profile", $data);
-	}
+        public function profile()
+        {
+                $user_id = $this->session->userdata('user_id');
+                $data['user'] = $this->User_model->get_user_by_id($user_id);
 
-	// public function index()
-	// {
-	// 	$data['user'] = $this->getUserData();
-	// 	$this->load->view('dashboard', $data);
-	// }
+                $this->load_view('profile', 'dashboard/profile', $data);
+        }
 
+        public function transactions()
+        {
+                $this->load->helper('jdf');
+                $user_id = $this->session->userdata('user_id');
 
-	public function index()
-	 {
-		
-		$user_id = $this->session->userdata('user_id');
+                $data['transactions'] = $this->Transaction_model->get_user_transactions($user_id);
 
-		$data['total_income']  = $this->Transaction_model->get_total_income($user_id);
-		$data['total_expense'] = $this->Transaction_model->get_total_expense($user_id);
-		$data['balance']       = $this->Transaction_model->get_balance($user_id);
+                // لود صفحه داخل داشبورد
+                $this->load_view('transactions', 'dashboard/transactions', $data);
+        }
 
-		$this->load->view("dashboard", $data);
-	 }
+        public function categories()
+        {
+                $user_id = $this->session->userdata('user_id');
 
-	public function chart_data()
-{
-		$this->load->helper('jdf');
+                $data['categories'] = $this->Transaction_category_model->get_by_user($user_id);
 
-		$user_id = $this->session->userdata('user_id');
-		$monthly = $this->Transaction_model->get_monthly_summary($user_id);
-
-		$labels = [];
-		$income = [];
-		$expense = [];
-
-		foreach ($monthly as $m) {
-
-			// فرض: مقدار month مثل "2024-01" یا "2024-1" است
-			$gregorian_date = $m->month . "-01"; // تبدیل به یک تاریخ کامل
-
-			// تبدیل به شمسی
-			$jalali_label = jdate("Y/m", strtotime($gregorian_date));
-
-			$labels[]  = $jalali_label;
-			$income[]  = (int)$m->total_income;
-			$expense[] = (int)$m->total_expense;
-		}
-
-		echo json_encode([
-			"labels" => $labels,
-			"income" => $income,
-			"expense" => $expense
-		]);
-	}
+                // نمایش داخل داشبورد
+                $this->load_view('categories', 'dashboard/categories', $data);
+        }
 
 
-	
+
+        // public function chart_data()
+        // {
+        //         $this->load->helper('jdf');
+        //         $user_id = $this->session->userdata("user_id");
+
+        //         $this->load->model("Transaction_model");
+        //         $rows = $this->Transaction_model->get_monthly_summary($user_id);
+
+        //         $labels = [];
+        //         $income = [];
+        //         $expense = [];
+
+        //         foreach ($rows as $row) {
+        //                 $labels[] = $row->month;
+        //                 $income[] = (int) $row->total_income;
+        //                 $expense[] = (int) $row->total_expense;
+        //         }
+
+        //         echo json_encode([
+        //                 "labels" => $labels,
+        //                 "income" => $income,
+        //                 "expense" => $expense
+        //         ]);
+        // }
+
+        public function chart_data()
+        {
+                $this->load->helper('jdf');
+                $user_id = $this->session->userdata('user_id');
+
+                $monthly = $this->Transaction_model->get_monthly_summary($user_id);
+
+                $labels = [];
+                $income = [];
+                $expense = [];
+
+                foreach ($monthly as $m) {
+                        // $m->month assumed format: YYYY-MM
+                        list($gy, $gm, $gd) = explode('-', $m->month . '-01'); // اضافه کردن روز فرضی 01
+                        list($jy, $jm, $jd) = gregorian_to_jalali($gy, $gm, $gd);
+
+                        // label شمسی
+                        $labels[] = sprintf('%04d/%02d', $jy, $jm);
+
+                        $income[] = (float) $m->total_income;
+                        $expense[] = (float) $m->total_expense;
+                }
+
+                echo json_encode([
+                        'labels' => $labels,
+                        'income' => $income,
+                        'expense' => $expense
+                ]);
+        }
+
+
+
+        public function api_summary()
+        {
+                $user_id = $this->session->userdata("user_id");
+
+                $this->load->model("Transaction_model");
+
+                $data = [
+                        "total_income" => (int) $this->Transaction_model->get_total_income($user_id),
+                        "total_expense" => (int) $this->Transaction_model->get_total_expense($user_id),
+                        "balance" => (int) $this->Transaction_model->get_balance($user_id),
+                ];
+
+                echo json_encode($data);
+        }
+
+        
+
 }

@@ -1,28 +1,5 @@
-<!DOCTYPE html>
-<html lang="fa">
-<head>
-    <meta charset="UTF-8">
-    <title>پروفایل کاربری</title>
-
-    <script src="https://unpkg.com/vue@3"></script>
-    <link rel="stylesheet"
-          href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-
-    <style>
-        body { direction: rtl; text-align: right; }
-        .pointer { cursor: pointer; }
-        .avatar {
-            width: 140px;
-            height: 140px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-    </style>
-</head>
-
-<body class="p-4">
-<div id="app" class="container">
-
+<div id="app">
+<div class="container">
     <h2 class="mb-4">پروفایل کاربری</h2>
 
     <!-- پیام‌ها -->
@@ -32,8 +9,8 @@
     <!-- اطلاعات کاربر -->
     <div class="card shadow-sm mb-4">
         <div class="card-body text-center">
-            <img :src="profile.profile_image || placeholder"
-                 class="avatar img-thumbnail mb-3">
+            <img :src="profile.profile_image || placeholder" class="avatar img-thumbnail mb-3" 
+                 style="width:140px; height:140px; border-radius:50%; object-fit:cover;">
 
             <h4>{{ profile.username }}</h4>
         </div>
@@ -77,8 +54,11 @@
 
         </div>
     </div>
-
 </div>
+</div>
+
+<!-- Vue 3 -->
+<script src="https://unpkg.com/vue@3"></script>
 
 <script>
 const app = Vue.createApp({
@@ -189,6 +169,3 @@ const app = Vue.createApp({
     }
 }).mount("#app");
 </script>
-
-</body>
-</html>

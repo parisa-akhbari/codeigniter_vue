@@ -1,9 +1,11 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Transactions extends CI_Controller {
+class Transactions extends CI_Controller
+{
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
 
         $this->load->model('Transaction_model', 'transactions_model');
@@ -12,10 +14,20 @@ class Transactions extends CI_Controller {
         $this->load->library(['form_validation', 'pagination']);
     }
 
-     private function persian_to_gregorian($persianDate) {
+    private function persian_to_gregorian($persianDate)
+    {
         // تبدیل اعداد فارسی به انگلیسی
         $persianDate = strtr($persianDate, [
-            '۰'=>'0','۱'=>'1','۲'=>'2','۳'=>'3','۴'=>'4','۵'=>'5','۶'=>'6','۷'=>'7','۸'=>'8','۹'=>'9'
+            '۰' => '0',
+            '۱' => '1',
+            '۲' => '2',
+            '۳' => '3',
+            '۴' => '4',
+            '۵' => '5',
+            '۶' => '6',
+            '۷' => '7',
+            '۸' => '8',
+            '۹' => '9'
         ]);
 
         // جایگزینی / با -
@@ -30,7 +42,8 @@ class Transactions extends CI_Controller {
         return sprintf("%04d-%02d-%02d", $gy, $gm, $gd);
     }
 
-     private function prepare_transaction_data($is_create = true) {
+    private function prepare_transaction_data($is_create = true)
+    {
         $this->load->helper("jdf");
 
         $gregorianDate = $this->persian_to_gregorian($this->input->post('transaction_date'));
@@ -51,7 +64,8 @@ class Transactions extends CI_Controller {
         return $data;
     }
 
-    private function set_transaction_validation_rules() {
+    private function set_transaction_validation_rules()
+    {
         $rules = [
             ['field' => 'title', 'label' => 'عنوان', 'rules' => 'required'],
             ['field' => 'amount', 'label' => 'مبلغ', 'rules' => 'required|numeric'],
@@ -61,88 +75,200 @@ class Transactions extends CI_Controller {
         ];
 
         $this->form_validation->set_rules($rules);
-}
+    }
 
 
     /** صفحه لیست تراکنش‌ها */
-    public function index() {
-		$user_id = $this->session->userdata('user_id');
-		$this->load->helper("jdf");
+    // public function index()
+    // {
+    //     $user_id = $this->session->userdata('user_id');
+    //     $this->load->helper("jdf");
 
-		// نگهداری مقدار شمسی برای فرم
-		$shamsi_start = $this->input->get('start_date');
-		$shamsi_end   = $this->input->get('end_date');
+    //     // نگهداری مقدار شمسی برای فرم
+    //     $shamsi_start = $this->input->get('start_date');
+    //     $shamsi_end = $this->input->get('end_date');
 
-		$filters = [
-			'title' => $this->input->get('title'),
-			'type' => $this->input->get('type'),
+    //     $filters = [
+    //         'title' => $this->input->get('title'),
+    //         'type' => $this->input->get('type'),
 
-			// این دو مقدار شمسی هستند و فقط برای فرم استفاده می‌شوند
-			'start_date_shamsi' => $shamsi_start,
-			'end_date_shamsi' => $shamsi_end,
+    //         // این دو مقدار شمسی هستند و فقط برای فرم استفاده می‌شوند
+    //         'start_date_shamsi' => $shamsi_start,
+    //         'end_date_shamsi' => $shamsi_end,
 
-			'user_id' => $user_id
-		];
+    //         'user_id' => $user_id
+    //     ];
 
-		// --- تبدیل تاریخ شمسی به میلادی برای جستجو ---
-		if (!empty($shamsi_start)) {
-			$clean = strtr($shamsi_start, ['۰'=>'0','۱'=>'1','۲'=>'2','۳'=>'3','۴'=>'4','۵'=>'5','۶'=>'6','۷'=>'7','۸'=>'8','۹'=>'9']);
-			list($jy, $jm, $jd) = explode('/', $clean);
-			list($gy, $gm, $gd) = jalali_to_gregorian($jy, $jm, $jd);
-			$filters['start_date'] = "$gy-$gm-$gd";
-		}
+    //     // --- تبدیل تاریخ شمسی به میلادی برای جستجو ---
+    //     if (!empty($shamsi_start)) {
+    //         $clean = strtr($shamsi_start, ['۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4', '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9']);
+    //         list($jy, $jm, $jd) = explode('/', $clean);
+    //         list($gy, $gm, $gd) = jalali_to_gregorian($jy, $jm, $jd);
+    //         $filters['start_date'] = "$gy-$gm-$gd";
+    //     }
 
-		if (!empty($shamsi_end)) {
-			$clean = strtr($shamsi_end, ['۰'=>'0','۱'=>'1','۲'=>'2','۳'=>'3','۴'=>'4','۵'=>'5','۶'=>'6','۷'=>'7','۸'=>'8','۹'=>'9']);
-			list($jy, $jm, $jd) = explode('/', $clean);
-			list($gy, $gm, $gd) = jalali_to_gregorian($jy, $jm, $jd);
-			$filters['end_date'] = "$gy-$gm-$gd";
-		}
+    //     if (!empty($shamsi_end)) {
+    //         $clean = strtr($shamsi_end, ['۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4', '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9']);
+    //         list($jy, $jm, $jd) = explode('/', $clean);
+    //         list($gy, $gm, $gd) = jalali_to_gregorian($jy, $jm, $jd);
+    //         $filters['end_date'] = "$gy-$gm-$gd";
+    //     }
 
-		// Pagination Config 
-		$config['base_url'] = site_url('transactions/index');
-		$config['total_rows'] = $this->transactions_model->count_filtered($filters);
-		$config['per_page'] = 10;
-		$config['page_query_string'] = TRUE;
-		$config['query_string_segment'] = 'page';
-		$config['use_page_numbers'] = TRUE;
+    //     // Pagination Config 
+    //     $config['base_url'] = site_url('transactions/index');
+    //     $config['total_rows'] = $this->transactions_model->count_filtered($filters);
+    //     $config['per_page'] = 10;
+    //     $config['page_query_string'] = TRUE;
+    //     $config['query_string_segment'] = 'page';
+    //     $config['use_page_numbers'] = TRUE;
 
-		$config['full_tag_open']  = '<ul class="pagination justify-content-center">';
-		$config['full_tag_close'] = '</ul>';
-		$config['num_tag_open']   = '<li class="page-item">';
-		$config['num_tag_close']  = '</li>';
-		$config['cur_tag_open']   = '<li class="page-item active"><a class="page-link">';
-		$config['cur_tag_close']  = '</a></li>';
-		$config['attributes']     = ['class' => 'page-link'];
+    //     $config['full_tag_open'] = '<ul class="pagination justify-content-center">';
+    //     $config['full_tag_close'] = '</ul>';
+    //     $config['num_tag_open'] = '<li class="page-item">';
+    //     $config['num_tag_close'] = '</li>';
+    //     $config['cur_tag_open'] = '<li class="page-item active"><a class="page-link">';
+    //     $config['cur_tag_close'] = '</a></li>';
+    //     $config['attributes'] = ['class' => 'page-link'];
 
-		$this->pagination->initialize($config);
+    //     $this->pagination->initialize($config);
 
-		$page = $this->input->get('page') ?: 1;
-		$offset = ($page - 1) * $config['per_page'];
+    //     $page = $this->input->get('page') ?: 1;
+    //     $offset = ($page - 1) * $config['per_page'];
 
-		$data['transactions'] = $this->transactions_model->get_filtered_paginated(
-			$filters,
-			$config['per_page'],
-			$offset
-		);
+    //     $data['transactions'] = $this->transactions_model->get_filtered_paginated(
+    //         $filters,
+    //         $config['per_page'],
+    //         $offset
+    //     );
 
-		// ارسال مقدارهای شمسی برای ویو
-		$data['filters'] = $filters;
+    //     // ارسال مقدارهای شمسی برای ویو
+    //     $data['filters'] = $filters;
 
-		$data['pagination'] = $this->pagination->create_links();
+    //     $data['pagination'] = $this->pagination->create_links();
 
-		$this->load->view('transactions/index', $data);
-	}
+    //     $this->load->view('transactions/index', $data);
+    // }
+
+    public function index()
+    {
+        $this->load->view('dashboard/transactions');
+    }
+
+    // لیست دسته‌بندی‌ها برای سلکت
+    public function api_list_categories()
+    {
+        $user_id = $this->session->userdata('user_id');
+        $cats = $this->categories_model->get_by_user($user_id); // یا get_all()
+        echo json_encode(['categories' => $cats]);
+    }
+
+    // جستجوی AJAX
+    public function api_search()
+    {
+        $this->load->helper("jdf");
+        $page = $this->input->get('page') ?: 1;
+        $page_size = 10;
+
+        $filters = [
+            'title' => $this->input->get('title'),
+            'type' => $this->input->get('type'),
+            'start_date_shamsi' => $this->input->get('start_date'),
+            'end_date_shamsi' => $this->input->get('end_date'),
+            'user_id' => $this->session->userdata('user_id')
+        ];
+
+        // تبدیل تاریخ شمسی → میلادی
+        if (!empty($filters['start_date_shamsi'])) {
+            $d = str_replace('/', '-', $filters['start_date_shamsi']);
+            list($jy, $jm, $jd) = explode('-', $d);
+            list($gy, $gm, $gd) = jalali_to_gregorian($jy, $jm, $jd);
+            $filters['start_date'] = "$gy-$gm-$gd";
+        }
+        if (!empty($filters['end_date_shamsi'])) {
+            $d = str_replace('/', '-', $filters['end_date_shamsi']);
+            list($jy, $jm, $jd) = explode('-', $d);
+            list($gy, $gm, $gd) = jalali_to_gregorian($jy, $jm, $jd);
+            $filters['end_date'] = "$gy-$gm-$gd";
+        }
+
+        $transactions = $this->transactions_model->get_filtered_paginated($filters, $page_size, ($page - 1) * $page_size);
+        $total = $this->transactions_model->count_filtered($filters);
+
+        foreach ($transactions as &$t) {
+            if ($t->transaction_date) {
+                list($y, $m, $d) = explode('-', $t->transaction_date);
+                list($jy, $jm, $jd) = gregorian_to_jalali($y, $m, $d);
+                $t->transaction_date_shamsi = "$jy/$jm/$jd";
+            }
+        }
+
+        echo json_encode([
+            'transactions' => $transactions,
+            'total_rows' => $total,
+            'page' => (int) $page,
+            'page_size' => $page_size
+        ]);
+    }
+
+    public function api_create()
+    {
+        $this->load->helper('jdf');
+        $post = $this->input->post();
+
+        $shamsi = str_replace('/', '-', $post['transaction_date_shamsi']);
+        list($jy, $jm, $jd) = explode('-', $shamsi);
+        list($gy, $gm, $gd) = jalali_to_gregorian($jy, $jm, $jd);
+
+        $data = [
+            'title' => $post['title'],
+            'amount' => $post['amount'],
+            'type' => $post['type'],
+            'category_id' => $post['category_id'],
+            'transaction_date' => "$gy-$gm-$gd",
+            'user_id' => $this->session->userdata('user_id')
+        ];
+
+        $this->transactions_model->insert($data);
+        echo json_encode(['status' => 'success']);
+    }
+
+    public function api_update($id)
+    {
+        $this->load->helper('jdf');
+        $post = $this->input->post();
+
+        $shamsi = str_replace('/', '-', $post['transaction_date_shamsi']);
+        list($jy, $jm, $jd) = explode('-', $shamsi);
+        list($gy, $gm, $gd) = jalali_to_gregorian($jy, $jm, $jd);
+
+        $data = [
+            'title' => $post['title'],
+            'amount' => $post['amount'],
+            'type' => $post['type'],
+            'category_id' => $post['category_id'],
+            'transaction_date' => "$gy-$gm-$gd"
+        ];
+
+        $this->transactions_model->update($id, $data);
+        echo json_encode(['status' => 'success']);
+    }
+
+    public function api_delete($id)
+    {
+        $this->transactions_model->delete($id);
+        echo json_encode(['status' => 'success']);
+    }
 
     /** صفحه ایجاد تراکنش جدید */
-    public function create() {
+    public function create()
+    {
         $this->load->helper("jdf");
         $user_id = $this->session->userdata('user_id');
         $data['categories'] = $this->categories_model->get_by_user($user_id);
 
         //$data['categories'] = $this->categories_model->get_all();
 
-         $this->set_transaction_validation_rules();
+        $this->set_transaction_validation_rules();
 
         if ($this->form_validation->run() === FALSE) {
             return $this->load->view('transactions/create', $data);
@@ -154,14 +280,16 @@ class Transactions extends CI_Controller {
 
         $this->transactions_model->insert($insert_data);
         redirect('transactions');
-}
+    }
 
     /** صفحه ویرایش تراکنش */
-    public function edit($id) {
+    public function edit($id)
+    {
         $this->load->helper("jdf");
 
         $data['transaction'] = $this->transactions_model->get_by_id($id);
-        if (!$data['transaction']) show_404();
+        if (!$data['transaction'])
+            show_404();
 
         $data['categories'] = $this->categories_model->get_all();
 
@@ -178,11 +306,12 @@ class Transactions extends CI_Controller {
 
         $this->transactions_model->update($id, $update_data);
         redirect('transactions');
-}
+    }
 
 
     /** حذف تراکنش */
-    public function delete($id) {
+    public function delete($id)
+    {
         $this->transactions_model->delete($id);
         redirect('transactions');
     }
