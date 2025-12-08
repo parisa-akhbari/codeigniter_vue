@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Transaction_model extends CI_Model
+class Transaction_model extends MY_Model
 {
 
     protected $table = 'transactions';
@@ -30,23 +30,23 @@ class Transaction_model extends CI_Model
             ->where('transactions.id', $id)->get()->row();
     }
 
-    /** درج تراکنش جدید */
-    public function insert(array $data)
-    {
-        return $this->db->insert($this->table, $data);
-    }
+    // /** درج تراکنش جدید */
+    // public function insert(array $data)
+    // {
+    //     return $this->db->insert($this->table, $data);
+    // }
 
-    /** بروزرسانی تراکنش */
-    public function update($id, array $data)
-    {
-        return $this->db->update($this->table, $data, ['id' => $id]);
-    }
+    // /** بروزرسانی تراکنش */
+    // public function update($id, array $data)
+    // {
+    //     return $this->db->update($this->table, $data, ['id' => $id]);
+    // }
 
-    /** حذف تراکنش */
-    public function delete($id)
-    {
-        return $this->db->delete($this->table, ['id' => $id]);
-    }
+    // /** حذف تراکنش */
+    // public function delete($id)
+    // {
+    //     return $this->db->delete($this->table, ['id' => $id]);
+    // }
 
     /** دریافت تراکنش‌ها با فیلتر و Pagination */
     public function get_filtered_paginated(array $filters = [], $limit = 10, $offset = 0)

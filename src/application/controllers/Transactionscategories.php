@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Transactionscategories extends CI_Controller
+class Transactionscategories extends MY_Controller
 {
 
     public function __construct()

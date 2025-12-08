@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Transactions extends CI_Controller
+class Transactions extends MY_Controller
 {
 
     public function __construct()
@@ -154,7 +154,7 @@ class Transactions extends CI_Controller
         $this->load->view('dashboard/transactions');
     }
 
-    // لیست دسته‌بندی‌ها برای سلکت
+    // لیست دسته‌بندی‌ها برای select
     public function api_list_categories()
     {
         $user_id = $this->session->userdata('user_id');
@@ -165,6 +165,7 @@ class Transactions extends CI_Controller
     // جستجوی AJAX
     public function api_search()
     {
+        
         $this->load->helper("jdf");
         $page = $this->input->get('page') ?: 1;
         $page_size = 10;
@@ -260,59 +261,59 @@ class Transactions extends CI_Controller
     }
 
     /** صفحه ایجاد تراکنش جدید */
-    public function create()
-    {
-        $this->load->helper("jdf");
-        $user_id = $this->session->userdata('user_id');
-        $data['categories'] = $this->categories_model->get_by_user($user_id);
+    // public function create()
+    // {
+    //     $this->load->helper("jdf");
+    //     $user_id = $this->session->userdata('user_id');
+    //     $data['categories'] = $this->categories_model->get_by_user($user_id);
 
-        //$data['categories'] = $this->categories_model->get_all();
+    //     //$data['categories'] = $this->categories_model->get_all();
 
-        $this->set_transaction_validation_rules();
+    //     $this->set_transaction_validation_rules();
 
-        if ($this->form_validation->run() === FALSE) {
-            return $this->load->view('transactions/create', $data);
-        }
+    //     if ($this->form_validation->run() === FALSE) {
+    //         return $this->load->view('transactions/create', $data);
+    //     }
 
-        $insert_data = $this->prepare_transaction_data(true);
+    //     $insert_data = $this->prepare_transaction_data(true);
 
-        //log_message("debug", "Insert data: " . print_r($insert_data, true));
+    //     //log_message("debug", "Insert data: " . print_r($insert_data, true));
 
-        $this->transactions_model->insert($insert_data);
-        redirect('transactions');
-    }
+    //     $this->transactions_model->insert($insert_data);
+    //     redirect('transactions');
+    // }
 
-    /** صفحه ویرایش تراکنش */
-    public function edit($id)
-    {
-        $this->load->helper("jdf");
+    // /** صفحه ویرایش تراکنش */
+    // public function edit($id)
+    // {
+    //     $this->load->helper("jdf");
 
-        $data['transaction'] = $this->transactions_model->get_by_id($id);
-        if (!$data['transaction'])
-            show_404();
+    //     $data['transaction'] = $this->transactions_model->get_by_id($id);
+    //     if (!$data['transaction'])
+    //         show_404();
 
-        $data['categories'] = $this->categories_model->get_all();
+    //     $data['categories'] = $this->categories_model->get_all();
 
-        $this->set_transaction_validation_rules();
-
-
-        if ($this->form_validation->run() === FALSE) {
-            return $this->load->view('transactions/edit', $data);
-        }
-
-        $update_data = $this->prepare_transaction_data(false);
-
-        // log_message("debug", "Update data: " . print_r($update_data, true));
-
-        $this->transactions_model->update($id, $update_data);
-        redirect('transactions');
-    }
+    //     $this->set_transaction_validation_rules();
 
 
-    /** حذف تراکنش */
-    public function delete($id)
-    {
-        $this->transactions_model->delete($id);
-        redirect('transactions');
-    }
+    //     if ($this->form_validation->run() === FALSE) {
+    //         return $this->load->view('transactions/edit', $data);
+    //     }
+
+    //     $update_data = $this->prepare_transaction_data(false);
+
+    //     // log_message("debug", "Update data: " . print_r($update_data, true));
+
+    //     $this->transactions_model->update($id, $update_data);
+    //     redirect('transactions');
+    // }
+
+
+    // /** حذف تراکنش */
+    // public function delete($id)
+    // {
+    //     $this->transactions_model->delete($id);
+    //     redirect('transactions');
+    // }
 }
